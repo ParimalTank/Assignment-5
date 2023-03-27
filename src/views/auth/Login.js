@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FormControl,
   IconButton,
@@ -11,9 +11,12 @@ import {
   Button,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
+
+// For Password Encrypt and decrypt
+const bcrypt = require("bcryptjs-react");
 
 // Data
 const initialValues = {
@@ -46,6 +49,16 @@ let loginSchema = Yup.object().shape({
 });
 
 const Login = () => {
+
+  const [userData , setUserData] = useState([]);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+      const userDetails =  localStorage.getItem('userData');
+      setUserData(JSON.parse(userDetails));
+  },[])
+
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -55,8 +68,21 @@ const Login = () => {
   };
 
   const onSubmit = (values) => {
-    console.log(values);
-  };
+    
+    const userEmail  =  values.email;
+    const userPassword = values.password;
+
+    userData.map((user) => {
+
+        if(user.email === userEmail && bcrypt.compareSync(userPassword, user.password)){
+             navigate('/Dashboard');
+        }else{
+           console.log('This is Unvalid User');
+        }
+    })
+    
+
+  };  
 
   return (
     <div className="main-sign-up">
@@ -72,8 +98,6 @@ const Login = () => {
             validateOnBlur={false} // Disable validation every field blur
           >
             {({
-              dirty,
-              isValid,
               values,
               touched,
               errors,
@@ -81,7 +105,6 @@ const Login = () => {
               validateField,
               handleBlur,
             }) => {
-              console.log("errors: ", errors);
 
               // Avoid a race condition to allow each field to be validated on change
               const handleInputChange = async (e, fieldName) => {
@@ -150,7 +173,7 @@ const Login = () => {
                         </Grid>
 
                         <Grid item className="my-3">
-                          <Button variant="contained">Login</Button>
+                          <Button variant="contained" type="submit">Login</Button>
                         </Grid>
                       </Grid>
                     </Grid>

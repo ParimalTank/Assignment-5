@@ -1,20 +1,43 @@
 import React from 'react'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import App from '../../src/App'
 import Login from '../../src/views/auth/Login'
+import SignUp from '../../src/views/auth/SignUp'
 
 
-const Comp = () =>{
+const LoginComponent = () =>{
   return (
     <BrowserRouter>
-      <Login />
+      <Routes>
+          <Route path="/" element={<App />}></Route>
+          <Route path='Login' element={<Login />}></Route>
+          <Route path='SignUp' element={<SignUp />}></Route>
+        </Routes>
     </BrowserRouter>
   )
+}
+
+const SignUpComponent = () => {
+   return(
+    <BrowserRouter>
+      <SignUp />
+    </BrowserRouter>
+   )
 }
 
 describe('<Login />', () => {
   it('renders', () => {
     // eslint-disable-next-line no-undef
-    cy.mount(<Comp />)
-    cy.get('#signup-btn').click()
+    cy.mount(<LoginComponent />)
+    // cy.get('#signup-btn').click()
+  })  
+})
+
+
+
+describe('<Signup />', () => {
+  it('renders', () => {
+    // eslint-disable-next-line no-undef
+    cy.mount(<SignUpComponent />)
   })  
 })

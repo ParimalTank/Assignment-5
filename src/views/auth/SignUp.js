@@ -8,13 +8,16 @@ import {
   TextField,
   Grid,
   CardContent,
-  Button
+  Button,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 // import { TextField } from "formik-material-ui";
+
+// For Password Encrypt and decrypt
+const bcrypt = require("bcryptjs-react");
 
 // Data
 const initialValues = {
@@ -54,15 +57,21 @@ let signUpSchema = Yup.object().shape({
     .matches(numericRegEx, "Must contains one Numeric character!")
     .matches(lengthRegEx, "Must contain 8 characters!")
     .required("Required!"),
-    
 
-
-  conformPassword: Yup.string()
-    .required("Required!")
-  });
+  conformPassword: Yup.string().required("Required!"),
+});
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
+
+  const [userData, setUserData] = useState([{}]);
+
+  const user = {
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    email: userData.email,
+    password: userData.password,
+  };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -71,7 +80,19 @@ const SignUp = () => {
   };
 
   const onSubmit = (values) => {
-    console.log(values);
+
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(values.password, salt);
+
+    const user = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      password: hash,
+    };
+    const userDataArray = [];
+    userDataArray.push(user);
+    localStorage.setItem("userData", JSON.stringify(userDataArray));
   };
 
   return (
@@ -87,16 +108,22 @@ const SignUp = () => {
             validateOnChange={false} // Disable validation every field change
             validateOnBlur={false} // Disable validation every field blur
           >
-            {({ dirty, isValid, values, touched,errors, handleChange,validateField, handleBlur }) => {
-              console.log('errors: ', errors);
-            
+            {({
+              dirty,
+              isValid,
+              values,
+              touched,
+              errors,
+              handleChange,
+              validateField,
+              handleBlur,
+            }) => {
               // Avoid a race condition to allow each field to be validated on change
               const handleInputChange = async (e, fieldName) => {
                 await handleChange(e);
                 validateField(fieldName);
               };
-              
-              
+
               return (
                 <Form>
                   <CardContent>
@@ -111,16 +138,18 @@ const SignUp = () => {
                             fullWidth
                             id="firstName"
                             label="FirstName"
-                            variant="standard"  
+                            variant="standard"
                             name="firstName"
                             defaultValue={values.firstName}
-                            onChange={(e) => handleInputChange(e, 'firstName')}
+                            onChange={(e) => handleInputChange(e, "firstName")}
                             isValid={touched.firstName && !errors.firstName}
                             isInvalid={!!errors.firstName}
                           />
-                          {
-                            errors.firstName ? <span className="text-danger error-text mb-0">{errors.firstName}</span> : null
-                          }
+                          {errors.firstName ? (
+                            <span className="text-danger error-text mb-0">
+                              {errors.firstName}
+                            </span>
+                          ) : null}
                         </Grid>
                         <Grid item xs={12} sm={12} lg={6}>
                           <TextField
@@ -130,13 +159,15 @@ const SignUp = () => {
                             variant="standard"
                             name="lastName"
                             defaultValue={values.lastName}
-                            onChange={(e) => handleInputChange(e, 'lastName')}
+                            onChange={(e) => handleInputChange(e, "lastName")}
                             isValid={touched.lastName && !errors.lastName}
                             isInvalid={!!errors.lastName}
                           />
-                           {
-                             errors.lastName ? <span className="text-danger error-text mb-0" >{errors.lastName}</span> : null
-                           }
+                          {errors.lastName ? (
+                            <span className="text-danger error-text mb-0">
+                              {errors.lastName}
+                            </span>
+                          ) : null}
                         </Grid>
 
                         <Grid item xs={12} sm={12} lg={12}>
@@ -147,12 +178,14 @@ const SignUp = () => {
                             variant="standard"
                             name="email"
                             defaultValue={values.email}
-                            onChange={(e) => handleInputChange(e, 'email')}
+                            onChange={(e) => handleInputChange(e, "email")}
                             isValid={touched.email && !errors.email}
                           />
-                          {
-                            errors.email ? <span className="text-danger error-text mb-0" >{errors.email}</span> : null
-                          }
+                          {errors.email ? (
+                            <span className="text-danger error-text mb-0">
+                              {errors.email}
+                            </span>
+                          ) : null}
                         </Grid>
 
                         <Grid item xs={12} sm={12} lg={12}>
@@ -162,15 +195,17 @@ const SignUp = () => {
                             label="MobileNumber"
                             variant="standard"
                             name="mobile"
-                            type='number'
+                            type="number"
                             defaultValue={values.mobile}
-                            onChange={(e) => handleInputChange(e, 'mobile')}
+                            onChange={(e) => handleInputChange(e, "mobile")}
                             handleBlur={handleBlur}
                             isValid={touched.mobile && !errors.mobile}
                           />
-                          {
-                            errors.mobile ? <span className="text-danger error-text mb-0" >{errors.mobile}</span> : null
-                          }
+                          {errors.mobile ? (
+                            <span className="text-danger error-text mb-0">
+                              {errors.mobile}
+                            </span>
+                          ) : null}
                         </Grid>
 
                         <Grid item xs={12} sm={12} lg={12}>
@@ -183,9 +218,8 @@ const SignUp = () => {
                               type={showPassword ? "text" : "password"}
                               name="password"
                               defaultValue={values.password}
-                              onChange={(e) => handleInputChange(e, 'password')}
+                              onChange={(e) => handleInputChange(e, "password")}
                               isValid={touched.password && !errors.password}
-
                               endAdornment={
                                 <InputAdornment position="end">
                                   <IconButton
@@ -203,9 +237,11 @@ const SignUp = () => {
                               }
                             />
                           </FormControl>
-                          {
-                            errors.password ? <span className="text-danger error-text mb-0" >{errors.password}</span> : null
-                          } 
+                          {errors.password ? (
+                            <span className="text-danger error-text mb-0">
+                              {errors.password}
+                            </span>
+                          ) : null}
                         </Grid>
 
                         <Grid item xs={12} sm={12} lg={12}>
@@ -219,9 +255,13 @@ const SignUp = () => {
                               fullWidth
                               name="conformPassword"
                               defaultValue={values.conformPassword}
-                              onChange={(e) => handleInputChange(e,'conformPassword')}
-                              isValid={touched.conformPassword && !errors.conformPassword}
-
+                              onChange={(e) =>
+                                handleInputChange(e, "conformPassword")
+                              }
+                              isValid={
+                                touched.conformPassword &&
+                                !errors.conformPassword
+                              }
                               endAdornment={
                                 <InputAdornment position="end">
                                   <IconButton
@@ -239,9 +279,12 @@ const SignUp = () => {
                               }
                             />
                           </FormControl>
-                          {
-                            values.conformPassword &&  values.conformPassword !== values.password ? <span className="text-danger error-text mb-0" >Password not match</span> : null
-                          } 
+                          {values.conformPassword &&
+                          values.conformPassword !== values.password ? (
+                            <span className="text-danger error-text mb-0">
+                              Password not match
+                            </span>
+                          ) : null}
                         </Grid>
                         <Grid item>
                           <Button
