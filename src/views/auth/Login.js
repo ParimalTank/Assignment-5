@@ -75,7 +75,7 @@ const Login = () => {
     userData.map((user) => {
 
         if(user.email === userEmail && bcrypt.compareSync(userPassword, user.password)){
-             navigate('/Dashboard');
+             navigate('/dashboard');
         }else{
            console.log('This is Unvalid User');
         }

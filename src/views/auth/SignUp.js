@@ -70,6 +70,7 @@ const SignUp = () => {
     firstName: userData.firstName,
     lastName: userData.lastName,
     email: userData.email,
+    mobile: userData.mobile,
     password: userData.password,
   };
 
@@ -88,6 +89,7 @@ const SignUp = () => {
       firstName: values.firstName,
       lastName: values.lastName,
       email: values.email,
+      mobile: values.mobile,
       password: hash,
     };
     const userDataArray = [];
